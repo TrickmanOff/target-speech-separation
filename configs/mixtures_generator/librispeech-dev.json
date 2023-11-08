@@ -1,0 +1,32 @@
+{
+  "name": "librispeech_mixtures_generation",
+  "preprocessing": {
+    "sr": 16000
+  },
+  "data": {
+    "root_dir": "/Volumes/Samsung_T5/hse4/dla/hw1/data",
+    "dataset": {
+      "type": "LibrispeechDataset",
+      "args": {
+        "part": "dev-clean"
+      }
+    }
+  },
+  "mixtures_generator": {
+    "generator": {
+      "type": "MixtureGenerator",
+      "args": {
+        "ntriplets": 3000,
+        "test": false
+      }
+    },
+    "params": {
+      "snr_levels": [0, 1, 2, 3, 4, 5],
+      "audio_len": 3,
+      "vad_db": 20,
+      "trim_db": 20,
+      "sr": 16000,
+      "update_steps": 1
+    }
+  }
+}
