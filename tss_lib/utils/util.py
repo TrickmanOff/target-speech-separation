@@ -1,3 +1,4 @@
+import dataclasses
 import json
 from collections import OrderedDict
 from itertools import repeat
@@ -19,6 +20,15 @@ def read_json(fname):
     fname = Path(fname)
     with fname.open("rt") as handle:
         return json.load(handle, object_hook=OrderedDict)
+
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        elif isinstance(o, Path):
+            return str(o)
+        return super().default(o)
 
 
 def write_json(content, fname):
