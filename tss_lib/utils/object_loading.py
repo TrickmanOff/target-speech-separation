@@ -2,35 +2,28 @@ from operator import xor
 
 from torch.utils.data import ConcatDataset, DataLoader
 
-import tss_lib.augmentations
 import tss_lib.datasets
 from tss_lib import batch_sampler as batch_sampler_module
-from tss_lib.base.base_text_encoder import BaseTextEncoder
 from tss_lib.collate_fn.collate import collate_fn
-from tss_lib.utils.parse_config import ConfigParser
+from tss_lib.config_processing.parse_config import ConfigParser
 
 
-def get_dataloaders(configs: ConfigParser, text_encoder: BaseTextEncoder):
+def get_dataloaders(configs: ConfigParser):
     dataloaders = {}
     for split, params in configs["data"].items():
         if not isinstance(params, dict):
             continue
         num_workers = params.get("num_workers", 1)
 
-        # set train augmentations
         if split == 'train':
-            wave_augs, spec_augs = tss_lib.augmentations.from_configs(configs)
             drop_last = True
         else:
-            wave_augs, spec_augs = None, None
             drop_last = False
 
         # create and join datasets
         datasets = []
         for ds in params["datasets"]:
-            datasets.append(configs.init_obj(
-                ds, tss_lib.datasets, text_encoder=text_encoder, config_parser=configs,
-                wave_augs=wave_augs, spec_augs=spec_augs))
+            datasets.append(configs.init_obj(ds, tss_lib.datasets, config_parser=configs))
         assert len(datasets)
         if len(datasets) > 1:
             dataset = ConcatDataset(datasets)

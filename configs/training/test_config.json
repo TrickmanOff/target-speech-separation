@@ -7,13 +7,13 @@
   "data": {
     "root_dir": "/Volumes/Samsung_T5/hse4/dla/hw2",
     "train": {
-      "batch_size": 20,
+      "batch_size": 3,
       "num_workers": 0,
       "datasets": [
         {
           "type": "LibrispeechDataset",
           "args": {
-            "part": "dev-clean"
+            "part": "dev-clean-3s"
           }
         }
       ]
