@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     config_path = Path(args.config)
     out_dirpath = Path(args.output)
-    speakers_mapping_filepath = Path(args.mapping)
+    speakers_mapping_filepath = None if args.mapping is None else Path(args.mapping)
     # ----
 
     config_dict = json.load(open(config_path, 'r'))

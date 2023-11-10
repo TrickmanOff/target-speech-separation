@@ -91,8 +91,8 @@ def normalize_wave_loudness(wave: np.ndarray, target_loudness: float, sample_rat
 
 
 def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage,
-               audio_len: float,
-               vad_db: float, trim_db: Optional[float] = None,
+               audio_len: Optional[float] = None,
+               vad_db: Optional[float] = None, trim_db: Optional[float] = None,
                test: bool = False, sr: int = 16_000) -> None:
     """
     :param snr_levels: from these values the targets mixed_wave snr is chosen randomly
@@ -142,6 +142,8 @@ def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage
     snr = np.random.choice(snr_levels, 1).item()
 
     if not test:
+        assert audio_len is not None
+        assert vad_db is not None
         s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
         s1_cut, s2_cut = cut_audios(s1, s2, audio_len, sr)
 
