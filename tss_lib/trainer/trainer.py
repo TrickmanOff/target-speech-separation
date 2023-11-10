@@ -13,6 +13,7 @@ from tqdm import tqdm
 from tss_lib.postprocessing.base_postprocessor import BasePostprocessor
 from tss_lib.trainer.base_trainer import BaseTrainer
 from tss_lib.metric.base_metric import BaseMetric
+from tss_lib.metric.pesq_metric import calc_pesq
 from tss_lib.logger.utils import plot_spectrogram_to_buf
 from tss_lib.loss.utils import calc_si_sdr
 from tss_lib.utils import inf_loop, MetricTracker, get_lr
@@ -247,12 +248,15 @@ class Trainer(BaseTrainer):
             rows[mix_id] = {
                 "mixed_wave": self._create_audio_for_writer(mixed_wave),
                 "ref_wave": self._create_audio_for_writer(ref_wave, ref_wave_length),
-                "pred_s1": self._create_audio_for_writer(w1),
-                "s1_SI-SDR": calc_si_sdr(target_wave, w1).item(),
-                "pred_s2": self._create_audio_for_writer(w2),
-                "s2_SI-SDR": calc_si_sdr(target_wave, w2).item(),
-                "pred_s3": self._create_audio_for_writer(w3),
-                "s3_SI-SDR": calc_si_sdr(target_wave, w3).item(),
+                "pred_w1": self._create_audio_for_writer(w1),
+                "w1_SI-SDR": calc_si_sdr(target_wave, w1).item(),
+                "w1_PESQ": calc_pesq(target_wave, w1).item(),
+                "pred_w2": self._create_audio_for_writer(w2),
+                "w2_SI-SDR": calc_si_sdr(target_wave, w2).item(),
+                "w2_PESQ": calc_pesq(target_wave, w2).item(),
+                "pred_w3": self._create_audio_for_writer(w3),
+                "w3_SI-SDR": calc_si_sdr(target_wave, w3).item(),
+                "w3_PESQ": calc_pesq(target_wave, w3).item(),
                 "pred_speaker_id": pred_speaker_id,
             }
             if target_wave is not None:

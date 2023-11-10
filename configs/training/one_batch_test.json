@@ -50,6 +50,27 @@
     "args": {}
   },
   "metrics": [
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w1_PESQ",
+        "pred_wave_index": 1
+      }
+    },
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w2_PESQ",
+        "pred_wave_index": 2
+      }
+    },
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w3_PESQ",
+        "pred_wave_index": 3
+      }
+    }
   ],
   "trainer": {
     "epochs": 50,
