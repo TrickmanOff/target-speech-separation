@@ -47,9 +47,10 @@ class SimpleMixturesStorage(MixturesStorage):
     REF_SUFFIX = 'ref'
     META_SUFFIX = 'meta.json'
 
-    def __init__(self, dirpath: Union[str, Path]):
+    def __init__(self, dirpath: Union[str, Path], speakers_mapping: Optional[Dict[str, int]] = None):
         self._dirpath = Path(dirpath)
         self._dirpath.mkdir(exist_ok=True)
+        self.speakers_mapping = speakers_mapping
 
     def _get_or_create_mix_dirpath(self, mix_id: str) -> Path:
         mix_dirpath = self._dirpath / mix_id
@@ -66,12 +67,15 @@ class SimpleMixturesStorage(MixturesStorage):
                 filenames[part] = filename
         return {
             'mixed_wave': mix_dirpath / filenames[self.MIX_SUFFIX],
-            'target': mix_dirpath / filenames[self.TARGET_SUFFIX],
+            'target_wave': mix_dirpath / filenames[self.TARGET_SUFFIX],
             'ref_wave': mix_dirpath / filenames[self.REF_SUFFIX],
         }
 
     def add_mix_meta(self, mix_id: str, meta: MixtureMeta) -> None:
         meta_filepath = self._get_or_create_mix_dirpath(mix_id) / f'{mix_id}-{self.META_SUFFIX}'
+        if self.speakers_mapping:
+            meta.target_speaker_id = self.speakers_mapping[meta.target_speaker_id]
+            meta.noise_speaker_id = self.speakers_mapping[meta.noise_speaker_id]
         json.dump(asdict(meta), open(meta_filepath, 'w'))
 
     def get_mix_meta(self, mix_id: str) -> Union[MixtureMeta, None]:

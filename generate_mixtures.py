@@ -29,14 +29,22 @@ if __name__ == '__main__':
         type=str,
         help="path to the directory for mixtures to be stored",
     )
+    args.add_argument(
+        "-m",
+        "--mapping",
+        default=None,
+        type=str,
+        help="path to the mapping from speaker IDs to numbers",
+    )
     args = args.parse_args()
 
     config_path = Path(args.config)
     out_dirpath = Path(args.output)
-
+    speakers_mapping_filepath = Path(args.mapping)
     # ----
 
     config_dict = json.load(open(config_path, 'r'))
+    speakers_mapping = None if speakers_mapping_filepath is None else json.load(open(speakers_mapping_filepath, 'r'))
     config = ConfigParser(config_dict)
     dataset: AudiosPerSpeakerIndexer = config.init_obj(config["data"]["dataset"],
                                                        audios_per_speaker_datasets_module,
@@ -46,7 +54,7 @@ if __name__ == '__main__':
         SpeakerFiles(id, files) for id, files in speakers_index.items()
     ]
 
-    mix_storage = SimpleMixturesStorage(out_dirpath)
+    mix_storage = SimpleMixturesStorage(out_dirpath, speakers_mapping=speakers_mapping)
     generator: MixtureGenerator = config.init_obj(config["mixtures_generator"]["generator"],
                                                   generators_module,
                                                   speakers_files=speakers_files,

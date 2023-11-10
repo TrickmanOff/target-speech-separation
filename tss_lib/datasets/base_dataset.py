@@ -22,7 +22,7 @@ class BaseDataset(Dataset):
     def __getitem__(self, ind):
         data_dict = self._index[ind]
         mix_id = data_dict['mix_id']
-        target_wave = self.load_audio(data_dict['target']) if 'target' in data_dict else None
+        target_wave = self.load_audio(data_dict['target_wave']) if 'target_wave' in data_dict else None
         target_speaker_id = None
         noise_speaker_id = None
         if 'meta' in data_dict:

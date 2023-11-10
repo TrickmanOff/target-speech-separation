@@ -16,7 +16,7 @@
     "generator": {
       "type": "MixtureGenerator",
       "args": {
-        "ntriplets": 3000,
+        "ntriplets": 1000,
         "test": false
       }
     },

@@ -157,7 +157,7 @@ def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage
             cur_out_filepaths = out_storage.get_mix_filepaths(cur_mix_id, with_ext='.wav')
 
             sf.write(cur_out_filepaths['mixed_wave'], mix, sr)
-            sf.write(cur_out_filepaths['targets'], s1_cut[i], sr)
+            sf.write(cur_out_filepaths['target_wave'], s1_cut[i], sr)
             sf.write(cur_out_filepaths['ref_wave'], ref, sr)
             out_storage.add_mix_meta(cur_mix_id, MixtureMeta(target_id, noise_id))
     else:
@@ -172,7 +172,7 @@ def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage
         mix = pyln.normalize.loudness(mix, loud_mix, -23.0)
 
         sf.write(out_filepaths['mixed_wave'], mix, sr)
-        sf.write(out_filepaths['targets'], s1, sr)
+        sf.write(out_filepaths['target_wave'], s1, sr)
         sf.write(out_filepaths['ref_wave'], ref, sr)
         out_storage.add_mix_meta(mix_id, MixtureMeta(target_id, noise_id))
 
@@ -256,11 +256,13 @@ class MixtureGenerator:
             futures = []
 
             for i in range(self.ntriplets):
-                triplet = {"reference": triplets["reference"][i],
-                           "targets": triplets["targets"][i],
-                           "noise": triplets["noise"][i],
-                           "target_id": triplets["target_id"][i],
-                           "noise_id": triplets["noise_id"][i]}
+                triplet = {
+                    "reference": triplets["reference"][i],
+                    "targets": triplets["targets"][i],
+                    "noise": triplets["noise"][i],
+                    "target_id": triplets["target_id"][i],
+                    "noise_id": triplets["noise_id"][i],
+                }
 
                 futures.append(pool.submit(create_mix, i, triplet,
                                            snr_levels, self.out_storage,
