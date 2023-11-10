@@ -1,5 +1,6 @@
 import logging
-from typing import Dict
+import random
+from typing import Dict, Optional
 
 import torchaudio
 from torch.utils.data import Dataset
@@ -12,11 +13,20 @@ logger = logging.getLogger(__name__)
 
 
 class BaseDataset(Dataset):
-    def __init__(self, index: Dict[str, Dict], config_parser: ConfigParser, *args, **kwargs):
+    def __init__(self, index: Dict[str, Dict], config_parser: ConfigParser,
+                 limit: Optional[int] = None, *args, **kwargs):
+        """
+        :param limit: not more than `limit` random audios are taken from the index
+        """
         # {mix_id: {targets: ..., mixed_wave: ..., ref_wave: ..., meta: ...}}
-        self._index = [
+        index = [
             mix_data | {'mix_id': mix_id} for mix_id, mix_data in index.items()
         ]
+        if limit is not None:
+            random.seed(42)  # best seed for deep learning
+            random.shuffle(index)
+            index = index[:limit]
+        self._index = index
         self.config_parser = config_parser
 
     def __getitem__(self, ind):
