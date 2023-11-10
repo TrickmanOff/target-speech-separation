@@ -20,7 +20,7 @@ class MixturesStorage:
     def get_mix_filepaths(self, mix_id: str, with_ext: Optional[str] = None) -> Dict[str, Path]:
         """
         paths without extension if such file does not exist
-        :return: {target: ..., mix: ..., ref: ...}
+        :return: {targets: ..., mix: ..., ref: ...}
         """
         raise NotImplementedError()
 
@@ -35,7 +35,7 @@ class MixturesStorage:
     @abstractmethod
     def get_index(self) -> Dict[str, Dict]:
         """
-        :return: {mix_id: {target: ..., mix: ..., ref: ..., meta: ...}}
+        :return: {mix_id: {targets: ..., mix: ..., ref: ..., meta: ...}}
         """
         raise NotImplementedError()
 

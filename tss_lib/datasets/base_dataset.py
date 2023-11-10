@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class BaseDataset(Dataset):
     def __init__(self, index: Dict[str, Dict], config_parser: ConfigParser, *args, **kwargs):
-        # {mix_id: {target: ..., mix: ..., ref: ..., meta: ...}}
+        # {mix_id: {targets: ..., mix: ..., ref: ..., meta: ...}}
         self._index = [
             mix_data | {'mix_id': mix_id} for mix_id, mix_data in index.items()
         ]

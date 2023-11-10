@@ -26,7 +26,7 @@ def collate_fn(dataset_items: List[dict]):
     
     during evaluation batch_size must be equal to 1, so collate_fn must do nothing
     
-    thus, no padding for mix and target waves is used
+    thus, no padding for mix and targets waves is used
     """
 
     # audio
