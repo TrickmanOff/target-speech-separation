@@ -26,7 +26,7 @@ def collate_fn(dataset_items: List[dict]):
     
     during evaluation batch_size must be equal to 1, so collate_fn must do nothing
     
-    thus, no padding for mix and targets waves is used
+    thus, no padding for mixed_wave and targets waves is used
     """
 
     # audio
@@ -46,9 +46,9 @@ def collate_fn(dataset_items: List[dict]):
                 F.pad(wave, (0, max_wave_len - wave.shape[1]), value=PADDING_VALUE)
                 for wave in waves
             ]
-        result_batch[wave_param] = torch.concat(waves, dim=0)  # (batch_dim, time_dim)
+        result_batch[wave_param] = torch.stack(waves, dim=0)  # (batch_dim, 1, time_dim)
         if waves_length is not None:
-            result_batch[wave_param.removesuffix("wave") + 'length'] = waves_length
+            result_batch[wave_param + '_length'] = waves_length
 
     # speakers' ids
     for speaker_id_param in ['target_speaker_id', 'noise_speaker_id']:

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class BaseDataset(Dataset):
     def __init__(self, index: Dict[str, Dict], config_parser: ConfigParser, *args, **kwargs):
-        # {mix_id: {targets: ..., mix: ..., ref: ..., meta: ...}}
+        # {mix_id: {targets: ..., mixed_wave: ..., ref_wave: ..., meta: ...}}
         self._index = [
             mix_data | {'mix_id': mix_id} for mix_id, mix_data in index.items()
         ]
@@ -29,8 +29,8 @@ class BaseDataset(Dataset):
             meta: MixtureMeta = data_dict['meta'] if isinstance(data_dict['meta'], MixtureMeta) else MixtureMeta(**data_dict['meta'])
             target_speaker_id = meta.target_speaker_id
             # noise_speaker_id = meta.noise_speaker_id
-        mixed_wave = self.load_audio(data_dict['mix'])
-        ref_wave = self.load_audio(data_dict['ref'])
+        mixed_wave = self.load_audio(data_dict['mixed_wave'])
+        ref_wave = self.load_audio(data_dict['ref_wave'])
 
         item = {
             'mix_id': mix_id,

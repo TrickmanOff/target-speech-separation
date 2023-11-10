@@ -1,0 +1,60 @@
+{
+  "name": "one_batch_test",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000
+  },
+  "arch": {
+    "type": "SpexPlus",
+    "args": {
+      "num_classes": 1000,
+      "N": 128,
+      "ref_embed_dim": 128,
+      "O": 128,
+      "P": 128,
+      "num_tcn_stacks": 2,
+      "num_blocks": 4
+    }
+  },
+  "data": {
+    "root_dir": "/Volumes/Samsung_T5/hse4/dla/hw2",
+    "train": {
+      "batch_size": 3,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean-3s",
+            "limit": 3
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 1e-3
+    }
+  },
+  "loss": {
+    "type": "SI_SDR_Loss",
+    "args": {}
+  },
+  "metrics": [
+  ],
+  "trainer": {
+    "epochs": 50,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "min val_loss",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "tss_project",
+    "wandb_run": "one_batch_test",
+    "len_epoch": 1,
+    "grad_norm_clip": 10
+  }
+}

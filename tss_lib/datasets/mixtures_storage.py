@@ -20,7 +20,7 @@ class MixturesStorage:
     def get_mix_filepaths(self, mix_id: str, with_ext: Optional[str] = None) -> Dict[str, Path]:
         """
         paths without extension if such file does not exist
-        :return: {targets: ..., mix: ..., ref: ...}
+        :return: {targets: ..., mixed_wave: ..., ref_wave: ...}
         """
         raise NotImplementedError()
 
@@ -35,7 +35,7 @@ class MixturesStorage:
     @abstractmethod
     def get_index(self) -> Dict[str, Dict]:
         """
-        :return: {mix_id: {targets: ..., mix: ..., ref: ..., meta: ...}}
+        :return: {mix_id: {targets: ..., mixed_wave: ..., ref_wave: ..., meta: ...}}
         """
         raise NotImplementedError()
 
@@ -65,9 +65,9 @@ class SimpleMixturesStorage(MixturesStorage):
             if part in filenames:
                 filenames[part] = filename
         return {
-            'mix': mix_dirpath / filenames[self.MIX_SUFFIX],
+            'mixed_wave': mix_dirpath / filenames[self.MIX_SUFFIX],
             'target': mix_dirpath / filenames[self.TARGET_SUFFIX],
-            'ref': mix_dirpath / filenames[self.REF_SUFFIX],
+            'ref_wave': mix_dirpath / filenames[self.REF_SUFFIX],
         }
 
     def add_mix_meta(self, mix_id: str, meta: MixtureMeta) -> None:

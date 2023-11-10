@@ -90,3 +90,8 @@ class MetricTracker:
 
     def keys(self):
         return self._data.total.keys()
+
+
+def get_lr(optimizer):
+    for param_group in optimizer.param_groups:
+        return param_group['lr']

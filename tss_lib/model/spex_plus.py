@@ -316,24 +316,24 @@ class SpexPlus(BaseModel):
                                               num_classes=num_classes, hidden_channels_1=O)
         self.speech_decoder = SpeechDecoder(L1, L2, L3, in_channels=N)
 
-    def forward(self, mix: Tensor, ref: Tensor) -> Dict[str, Tensor]:
+    def forward(self, mixed_wave: Tensor, ref_wave: Tensor, **batch) -> Dict[str, Tensor]:
         """
         input:
-            mix:  (batch_dim, 1, T)
-            ref:  (batch_dim, 1, T_ref)
+            mixed_wave:  (batch_dim, 1, T)
+            ref_wave:   (batch_dim, 1, T_ref)
 
         output:
-            si:   (batch_dim, 1, T) - predicted targets audio from mix
+            wi:   (batch_dim, 1, T) - predicted targets audio from mixed_wave
                 for i = 1, 2, 3
             speakers_logits: (batch_dim, num_classes) - predicted logits of targets speaker
         """
 
-        encoded_mix = self.speech_encoder(mix)
-        encoded_ref = self.speech_encoder(ref)['e']  # (batch_dim, 3*N, K)
+        encoded_mix = self.speech_encoder(mixed_wave)
+        encoded_ref = self.speech_encoder(ref_wave)['e']  # (batch_dim, 3*N, K)
         speaker_encoder_res = self.speaker_encoder(encoded_ref)
         ref_embed, speakers_logits = speaker_encoder_res['embed'], speaker_encoder_res['logits']
         encoded_pred_audios = self.speaker_extractor(ref_embed=ref_embed, **encoded_mix)
         pred_audios = self.speech_decoder(**encoded_pred_audios)
-        pred_audios = {key: audio[:, :, :mix.shape[-1]] for key, audio in pred_audios.items()}
+        pred_audios = {key: audio[:, :, :mixed_wave.shape[-1]] for key, audio in pred_audios.items()}
         result = pred_audios | {'speakers_logits': speakers_logits}
         return result
