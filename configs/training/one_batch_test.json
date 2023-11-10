@@ -7,7 +7,7 @@
   "arch": {
     "type": "SpexPlus",
     "args": {
-      "num_classes": 1000,
+      "num_classes": 1212,
       "N": 128,
       "ref_embed_dim": 128,
       "O": 128,
@@ -46,7 +46,7 @@
     }
   },
   "loss": {
-    "type": "SI_SDR_Loss",
+    "type": "SpexPlusLoss",
     "args": {}
   },
   "metrics": [
@@ -62,6 +62,6 @@
     "wandb_project": "tss_project",
     "wandb_run": "one_batch_test",
     "len_epoch": 1,
-    "grad_norm_clip": 10
+    "grad_norm_clip": 50
   }
 }
