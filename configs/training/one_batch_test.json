@@ -16,6 +16,13 @@
       "num_blocks": 4
     }
   },
+  "postprocessor": {
+    "type": "LoudnessNormalizer",
+    "args": {
+      "target_loudness": -23,
+      "sr": 16000
+    }
+  },
   "data": {
     "root_dir": "/Volumes/Samsung_T5/hse4/dla/hw2",
     "train": {

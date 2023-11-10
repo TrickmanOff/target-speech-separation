@@ -8,6 +8,7 @@ import torch
 import tss_lib.loss as module_loss
 import tss_lib.metric as module_metric
 import tss_lib.model as module_arch
+import tss_lib.postprocessing as module_postprocessing
 from tss_lib.config_processing.parse_config import ConfigParser
 from tss_lib.trainer import Trainer
 from tss_lib.utils import prepare_device
@@ -55,6 +56,11 @@ def main(config):
     else:
         lr_scheduler = None
 
+    if "postprocessor" in config.config:
+        postprocessor = config.init_obj(config["postprocessor"], module_postprocessing)
+    else:
+        postprocessor = None
+
     trainer = Trainer(
         model,
         loss_module,
@@ -63,6 +69,7 @@ def main(config):
         config=config,
         device=device,
         dataloaders=dataloaders,
+        postprocessor=postprocessor,
         lr_scheduler=lr_scheduler,
         len_epoch=config["trainer"].get("len_epoch", None)
     )

@@ -82,6 +82,14 @@ def fix_length(s1: np.ndarray, s2: np.ndarray, min_or_max: str = 'max') -> Tuple
     return s1, s2
 
 
+def normalize_wave_loudness(wave: np.ndarray, target_loudness: float, sample_rate: int) -> np.ndarray:
+    meter = pyln.Meter(sample_rate)  # create BS.1770 meter
+
+    louds = meter.integrated_loudness(wave)
+    wave_norm = pyln.normalize.loudness(wave, louds, target_loudness)
+    return wave_norm
+
+
 def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage,
                audio_len: float,
                vad_db: float, trim_db: Optional[float] = None,

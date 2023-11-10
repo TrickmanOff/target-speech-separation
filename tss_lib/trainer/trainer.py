@@ -10,9 +10,11 @@ from torch.nn.utils import clip_grad_norm_
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
+from tss_lib.postprocessing.base_postprocessor import BasePostprocessor
 from tss_lib.trainer.base_trainer import BaseTrainer
 from tss_lib.metric.base_metric import BaseMetric
 from tss_lib.logger.utils import plot_spectrogram_to_buf
+from tss_lib.loss.utils import calc_si_sdr
 from tss_lib.utils import inf_loop, MetricTracker, get_lr
 
 
@@ -30,6 +32,7 @@ class Trainer(BaseTrainer):
             config,
             device,
             dataloaders,
+            postprocessor: BasePostprocessor = None,
             lr_scheduler=None,
             len_epoch=None,
             skip_oom=True,
@@ -46,6 +49,7 @@ class Trainer(BaseTrainer):
             self.train_dataloader = inf_loop(self.train_dataloader)
             self.len_epoch = len_epoch
         self.evaluation_dataloaders = {k: v for k, v in dataloaders.items() if k != "train"}
+        self.postprocessor = postprocessor
         self.lr_scheduler = lr_scheduler
         self.log_step = config["trainer"].get("log_step", 50)
 
@@ -150,6 +154,8 @@ class Trainer(BaseTrainer):
         # criterion returns a dict, in which the final loss has a key 'loss'
         losses = self.criterion(**batch)
         batch.update(losses)
+        if self.postprocessor is not None:
+            batch = self.postprocessor(**batch)
         if is_train:
             (batch["loss"] / self.accumulate_grad_steps).backward()
             self.accumulated_grad_steps += 1
@@ -224,7 +230,6 @@ class Trainer(BaseTrainer):
     ):
         if self.writer is None:
             return
-
         pred_speaker_id = speakers_log_probs.argmax(-1)
 
         if target_wave is None:
@@ -232,24 +237,26 @@ class Trainer(BaseTrainer):
         if target_speaker_id is None:
             target_speaker_id = [None] * mixed_wave.shape[0]
 
-        tuples = list(zip(mix_id, mixed_wave, ref_wave, ref_wave_length, w1, w2, w3, target_wave, target_speaker_id, pred_speaker_id))
+        tuples = list(zip(mix_id, mixed_wave, ref_wave, ref_wave_length, w1, w2, w3,
+                          target_wave, target_speaker_id, pred_speaker_id))
         shuffle(tuples)
         rows = {}
 
         for mix_id, mixed_wave, ref_wave, ref_wave_length, w1, w2, w3, target_wave, target_speaker_id, pred_speaker_id \
                 in tuples[:examples_to_log]:
             rows[mix_id] = {
-                "mix_id": mix_id,
                 "mixed_wave": self._create_audio_for_writer(mixed_wave),
                 "ref_wave": self._create_audio_for_writer(ref_wave, ref_wave_length),
                 "pred_s1": self._create_audio_for_writer(w1),
+                "s1_SI-SDR": calc_si_sdr(target_wave, w1).item(),
                 "pred_s2": self._create_audio_for_writer(w2),
+                "s2_SI-SDR": calc_si_sdr(target_wave, w2).item(),
                 "pred_s3": self._create_audio_for_writer(w3),
-                "target_wave": self._create_audio_for_writer(target_wave),
+                "s3_SI-SDR": calc_si_sdr(target_wave, w3).item(),
                 "pred_speaker_id": pred_speaker_id,
             }
             if target_wave is not None:
-                rows[mix_id]["target"] = self._create_audio_for_writer(target_wave)
+                rows[mix_id]["target_wave"] = self._create_audio_for_writer(target_wave)
             if target_speaker_id is not None:
                 rows[mix_id]["target_speaker_id"] = target_speaker_id
         table = pd.DataFrame.from_dict(rows, orient="index")\
