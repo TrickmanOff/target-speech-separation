@@ -8,7 +8,7 @@
     "dataset": {
       "type": "LibrispeechDataset",
       "args": {
-        "part": "dev-clean"
+        "part": "test-clean"
       }
     }
   },
@@ -16,17 +16,14 @@
     "generator": {
       "type": "MixtureGenerator",
       "args": {
-        "ntriplets": 1000,
-        "test": false
+        "ntriplets": 3000,
+        "test": true
       }
     },
     "params": {
-      "snr_levels": [0, 1, 2, 3, 4, 5],
-      "audio_len": 3,
-      "vad_db": 20,
-      "trim_db": 20,
+      "snr_levels": [0],
       "sr": 16000,
-      "update_steps": 20
+      "update_steps": 100
     }
   }
 }
