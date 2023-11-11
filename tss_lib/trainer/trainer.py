@@ -62,6 +62,7 @@ class Trainer(BaseTrainer):
         )
         self.evaluation_metrics = MetricTracker(
             "loss",
+            *criterion.get_loss_parts_names(),
             *[m.name for m in self.metrics],
             writer=self.writer
         )
