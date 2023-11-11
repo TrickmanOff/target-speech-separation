@@ -29,6 +29,6 @@ class SpexPlusLoss(BaseLoss):
             res_loss['loss'] = (1 - self.cls_loss_weight) * si_sdr_loss['loss'] + self.cls_loss_weight * cls_loss
             res_loss['cls_loss'] = cls_loss
         else:
-            res_loss['loss'] *= (1 - self.cls_loss_weight)
+            res_loss['loss'] = res_loss['loss'] * (1 - self.cls_loss_weight)
         res_loss['SI-SDR'] = -si_sdr_loss['loss']
         return res_loss

@@ -65,6 +65,13 @@
     "args": {}
   },
   "metrics": [
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w1_PESQ",
+        "pred_wave_index": 1
+      }
+    }
   ],
   "trainer": {
     "epochs": 100,
@@ -83,7 +90,8 @@
     "visualize": "wandb",
     "wandb_project": "tss_project",
     "wandb_run": "kaggle_test",
-    "len_epoch": 100,
+    "len_epoch": 300,
+    "log_step": 150,
     "grad_norm_clip": 50
   }
 }
