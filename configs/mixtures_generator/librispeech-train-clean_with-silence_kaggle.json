@@ -1,0 +1,31 @@
+{
+  "name": "librispeech_mixtures_generation",
+  "preprocessing": {
+    "sr": 16000
+  },
+  "data": {
+    "dataset": {
+      "type": "LibrispeechDataset",
+      "args": {
+        "part": "train-clean-100",
+        "data_dir": "/kaggle/input/librispeech-clean/LibriSpeech",
+        "index_dir": "/kaggle/working/indices"
+      }
+    }
+  },
+  "mixtures_generator": {
+    "generator": {
+      "type": "MixtureGenerator",
+      "args": {
+        "ntriplets": 8000,
+        "test": false
+      }
+    },
+    "params": {
+      "snr_levels": [-1, 0, 1, 2, 3, 4, 5],
+      "audio_len": 3,
+      "sr": 16000,
+      "update_steps": 100
+    }
+  }
+}

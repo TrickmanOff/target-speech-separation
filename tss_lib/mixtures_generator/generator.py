@@ -143,8 +143,8 @@ def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage
 
     if not test:
         assert audio_len is not None
-        assert vad_db is not None
-        s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
+        if vad_db is not None:
+            s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
         s1_cut, s2_cut = cut_audios(s1, s2, audio_len, sr)
 
         for i in range(len(s1_cut)):
