@@ -1,13 +1,15 @@
 """
 https://arxiv.org/abs/2005.04686
 """
-from typing import Dict, Optional
+from collections import defaultdict
+from typing import Dict, List, Optional
 
 import torch
 import torch.nn.functional as F
 from torch import Tensor
 from torch import nn
 
+from tss_lib.mixtures_generator.generator import cut_audios
 from tss_lib.model.base_model import BaseModel
 
 
@@ -58,8 +60,8 @@ class TemporalEncoder(nn.Module):
         output: (batch_dim, N, K)
         """
         T = x.shape[-1]
-        T = self.min_L * ((T + self.min_L - 1) // self.min_L)  # for correct inverse convolution
-        K = (T - self.min_L) // self.stride + 1
+        rounded_T = self.min_L * ((T + self.min_L - 1) // self.min_L)  # for correct inverse convolution
+        K = (rounded_T - self.min_L) // self.stride + 1
         rp = max(0, self.stride * (K - 1) - T + self.L)
         x = F.pad(x, (0, rp), mode='constant', value=0)
         return self.relu(self.conv(x))
@@ -305,7 +307,12 @@ class SpexPlus(BaseModel):
                  O: int = 256, P: int = 512,
                  num_tcn_stacks: int = 4,
                  L1: int = 40, L2: int = 160, L3: int = 320,
+                 chunk_dur: Optional[float] = None,
+                 sr: Optional[int] = None,
                  **tcn_kwargs):
+        """
+        :param chunk_dur: if not None, chunk duration in seconds (`sr` must not be None)
+        """
         super().__init__()
         self.speech_encoder = SpeechEncoder(L1, L2, L3, N)
         tcn_kwargs['hidden_channels'] = P
@@ -315,11 +322,21 @@ class SpexPlus(BaseModel):
         self.speaker_encoder = SpeakerEncoder(in_channels=3*N, ref_embed_dim=ref_embed_dim,
                                               num_classes=num_classes, hidden_channels_1=O)
         self.speech_decoder = SpeechDecoder(L1, L2, L3, in_channels=N)
+        self.chunk_dur = chunk_dur
+        self.sr = sr
+        if chunk_dur is not None:
+            assert sr is not None
+
+    def _split_into_chunks(self, wave: Tensor) -> List[Tensor]:
+        if self.chunk_dur is None:
+            return [wave]
+        else:
+            return cut_audios(wave, sec=self.chunk_dur, sr=self.sr, same_intervals=False)[0]
 
     def forward(self, mixed_wave: Tensor, ref_wave: Tensor, **batch) -> Dict[str, Tensor]:
         """
         input:
-            mixed_wave:  (batch_dim, 1, T)
+            mixed_wave: (batch_dim, 1, T)
             ref_wave:   (batch_dim, 1, T_ref)
 
         output:
@@ -328,12 +345,29 @@ class SpexPlus(BaseModel):
             speakers_logits: (batch_dim, num_classes) - predicted logits of targets speaker
         """
 
-        encoded_mix = self.speech_encoder(mixed_wave)
         encoded_ref = self.speech_encoder(ref_wave)['e']  # (batch_dim, 3*N, K)
         speaker_encoder_res = self.speaker_encoder(encoded_ref)
         ref_embed, speakers_logits = speaker_encoder_res['embed'], speaker_encoder_res['logits']
-        encoded_pred_audios = self.speaker_extractor(ref_embed=ref_embed, **encoded_mix)
-        pred_audios = self.speech_decoder(**encoded_pred_audios)
-        pred_audios = {key: audio[:, :, :mixed_wave.shape[-1]] for key, audio in pred_audios.items()}
+
+        print(mixed_wave.shape)
+        mixed_wave_chunks = self._split_into_chunks(mixed_wave)
+        for chunk in mixed_wave_chunks:
+            print(chunk.shape)
+        encoded_mixed_wave_chunks = [self.speech_encoder(chunk) for chunk in mixed_wave_chunks]
+        encoded_pred_audios_chunks = [self.speaker_extractor(ref_embed=ref_embed, **encoded_chunk) for encoded_chunk in encoded_mixed_wave_chunks]
+        pred_audios_chunks = [self.speech_decoder(**chunk) for chunk in encoded_pred_audios_chunks]
+        pred_audios_chunks = [
+            {key: audio[:, :, :mixed_wave_chunk.shape[-1]] for key, audio in pred_audios_chunk.items()}
+            for mixed_wave_chunk, pred_audios_chunk in zip(mixed_wave_chunks, pred_audios_chunks)
+        ]
+        pred_audios = defaultdict(list)
+        for pred_audio_chunk in pred_audios_chunks:
+            for key, val in pred_audio_chunk.items():
+                pred_audios[key].append(val)
+        pred_audios = {
+            key: torch.concat(pred_audios, -1)  # concatenate chunks over time
+            for key, pred_audios in pred_audios.items()
+        }
+
         result = pred_audios | {'speakers_logits': speakers_logits}
         return result

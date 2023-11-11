@@ -2,12 +2,13 @@ import random
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import librosa
 import numpy as np
 import pyloudnorm as pyln
 import soundfile as sf
+import torch
 from tqdm import tqdm
 
 from tss_lib.datasets.mixtures_storage import MixtureMeta, MixturesStorage
@@ -41,26 +42,30 @@ def vad_merge(w: np.ndarray, top_db: float) -> np.ndarray:
     return np.concatenate(temp, axis=None)
 
 
-def cut_audios(s1: np.ndarray, s2: np.ndarray, sec: float, sr: int) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+def cut_audios(*ss: Union[np.ndarray, torch.Tensor], sec: float, sr: int,
+               same_intervals: bool = True) -> Tuple[List[Union[np.ndarray, torch.Tensor]], ...]:
     """
     splits the audios `s1`, `s2` into intervals of `sec` seconds each
     assuming that both audios are parallel
-    """
-    cut_len = sr * sec
-    len1 = len(s1)
-    len2 = len(s2)
 
-    s1_cut = []
-    s2_cut = []
+    audios may be of shape (..., T)
+    """
+    cut_len = int(sr * sec)
+    min_len = min(s.shape[-1] for s in ss)
+
+    ss_cuts = [[] for _ in range(len(ss))]  # [[s1: ...], [s2: ...], ...]
 
     segment = 0
-    while (segment + 1) * cut_len < len1 and (segment + 1) * cut_len < len2:
-        s1_cut.append(s1[segment * cut_len:(segment + 1) * cut_len])
-        s2_cut.append(s2[segment * cut_len:(segment + 1) * cut_len])
-
+    while (segment + 1) * cut_len < min_len:
+        for s, s_cuts in zip(ss, ss_cuts):
+            s_cuts.append(s[..., segment * cut_len:(segment + 1) * cut_len])
         segment += 1
+    if not same_intervals:
+        assert all(s.shape[-1] == min_len for s in ss)
+        for s, s_cuts in zip(ss, ss_cuts):
+            s_cuts.append(s[..., segment * cut_len:])
 
-    return s1_cut, s2_cut
+    return tuple(ss_cuts)
 
 
 def fix_length(s1: np.ndarray, s2: np.ndarray, min_or_max: str = 'max') -> Tuple[np.ndarray, np.ndarray]:
@@ -145,7 +150,7 @@ def create_mix(idx: int, triplet: Dict, snr_levels, out_storage: MixturesStorage
         assert audio_len is not None
         if vad_db is not None:
             s1, s2 = vad_merge(s1, vad_db), vad_merge(s2, vad_db)
-        s1_cut, s2_cut = cut_audios(s1, s2, audio_len, sr)
+        s1_cut, s2_cut = cut_audios(s1, s2, audio_len=audio_len, sr=sr)
 
         for i in range(len(s1_cut)):
             mix = snr_mixer(s1_cut[i], s2_cut[i], snr)
