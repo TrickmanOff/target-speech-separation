@@ -349,10 +349,7 @@ class SpexPlus(BaseModel):
         speaker_encoder_res = self.speaker_encoder(encoded_ref)
         ref_embed, speakers_logits = speaker_encoder_res['embed'], speaker_encoder_res['logits']
 
-        print(mixed_wave.shape)
         mixed_wave_chunks = self._split_into_chunks(mixed_wave)
-        for chunk in mixed_wave_chunks:
-            print(chunk.shape)
         encoded_mixed_wave_chunks = [self.speech_encoder(chunk) for chunk in mixed_wave_chunks]
         encoded_pred_audios_chunks = [self.speaker_extractor(ref_embed=ref_embed, **encoded_chunk) for encoded_chunk in encoded_mixed_wave_chunks]
         pred_audios_chunks = [self.speech_decoder(**chunk) for chunk in encoded_pred_audios_chunks]
