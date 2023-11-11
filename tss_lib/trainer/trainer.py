@@ -73,7 +73,7 @@ class Trainer(BaseTrainer):
         """
         Move all necessary tensors to the GPU
         """
-        for tensor_for_gpu in ["mixed_wave", "ref_wave", "target_speaker_id", "target_speaker_id"]:
+        for tensor_for_gpu in ["target_wave", "mixed_wave", "ref_wave", "target_speaker_id", "noise_speaker_id"]:
             if tensor_for_gpu in batch:
                 batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
         return batch
@@ -267,8 +267,8 @@ class Trainer(BaseTrainer):
                             .reset_index().rename(columns={'index': 'mix_id'})
         self.writer.add_table("predictions", table)
 
-    def _create_audio_for_writer(self, audio, length=None):
-        audio = audio.detach().squeeze()
+    def _create_audio_for_writer(self, audio: torch.Tensor, length=None):
+        audio = audio.detach().cpu().squeeze()
         if length is not None:
             audio = audio[:length]
         return self.writer.create_audio(audio, sample_rate=self.config["preprocessing"]["sr"])

@@ -13,8 +13,8 @@ class LoudnessNormalizer(BasePostprocessor):
 
     def __call__(self, **batch) -> Dict:
         for wave_key in ['w1', 'w2', 'w3']:
-            waves = batch[wave_key].detach().numpy()
+            waves = batch[wave_key].detach().cpu().numpy()
             for i in range(batch[wave_key].shape[0]):
                 waves[i, 0] = normalize_wave_loudness(waves[i, 0], self.target_loudness, self.sr)
-            batch[wave_key] = torch.tensor(waves)
+            batch[wave_key] = torch.tensor(waves).to(batch[wave_key].device)
         return batch
