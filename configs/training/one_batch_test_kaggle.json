@@ -1,0 +1,88 @@
+{
+  "name": "one_batch_test",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000
+  },
+  "arch": {
+    "type": "SpexPlus",
+    "args": {
+      "num_classes": 1212,
+      "N": 128,
+      "ref_embed_dim": 256,
+      "O": 256,
+      "P": 512,
+      "num_tcn_stacks": 4,
+      "num_blocks": 8
+    }
+  },
+  "postprocessor": {
+    "type": "LoudnessNormalizer",
+    "args": {
+      "target_loudness": -23,
+      "sr": 16000
+    }
+  },
+  "data": {
+    "train": {
+      "batch_size": 4,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "train-clean-3s",
+            "data_dir": "/kaggle/input/librispeech-mixtures/train-clean-3s",
+            "index_dir": "/kaggle/working/indices"
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 1e-3
+    }
+  },
+  "loss": {
+    "type": "SpexPlusLoss",
+    "args": {}
+  },
+  "metrics": [
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w1_PESQ",
+        "pred_wave_index": 1
+      }
+    },
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w2_PESQ",
+        "pred_wave_index": 2
+      }
+    },
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w3_PESQ",
+        "pred_wave_index": 3
+      }
+    }
+  ],
+  "trainer": {
+    "epochs": 50,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "min val_loss",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "tss_project",
+    "wandb_run": "one_batch_test",
+    "len_epoch": 1,
+    "grad_norm_clip": 50
+  }
+}
