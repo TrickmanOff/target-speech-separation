@@ -68,4 +68,5 @@ class LibrispeechDataset(BaseDataset):
             self._load_part(part)
 
         mix_storage = SimpleMixturesStorage(split_dir)
+        print(f"Building index for {part} mixtures")
         return mix_storage.get_index()
