@@ -1,5 +1,5 @@
 {
-  "name": "one_batch_test",
+  "name": "kaggle_test",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 16000
@@ -31,7 +31,7 @@
         }
       ]
     },
-    "test": {
+    "val": {
       "batch_size": 1,
       "num_workers": 0,
       "datasets": [
@@ -40,7 +40,8 @@
           "args": {
             "part": "dev-clean-3s",
             "data_dir": "/kaggle/input/librispeech-mixtures/dev-clean-3s",
-            "index_dir": "/kaggle/working/indices"
+            "index_dir": "/kaggle/working/indices",
+            "limit": 50
           }
         }
       ]
@@ -63,32 +64,25 @@
         "name": "w1_PESQ",
         "pred_wave_index": 1
       }
-    },
-    {
-      "type": "PESQMetric",
-      "args": {
-        "name": "w2_PESQ",
-        "pred_wave_index": 2
-      }
-    },
-    {
-      "type": "PESQMetric",
-      "args": {
-        "name": "w3_PESQ",
-        "pred_wave_index": 3
-      }
     }
   ],
   "trainer": {
-    "epochs": 50,
+    "epochs": 100,
     "save_dir": "saved/",
-    "save_period": 200,
+    "save_period": 100000000000,
+    "external_storage": {
+        "type": "GDriveStorage",
+        "args": {
+            "storage_dir_id": "1XvqMQjnXGuNT3lL7xPuEK-qVCc8i-e9D",
+            "client_secrets_filepath": "/kaggle/input/gdrive-secrets/client_secrets.json"
+        }
+    },
     "verbosity": 2,
-    "monitor": "min val_loss",
+    "monitor": "max SI-SDR",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "tss_project",
-    "wandb_run": "one_batch_test",
+    "wandb_run": "kaggle_test",
     "len_epoch": 1,
     "grad_norm_clip": 50
   }
