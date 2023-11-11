@@ -16,6 +16,13 @@
       "num_blocks": 8
     }
   },
+  "postprocessor": {
+    "type": "LoudnessNormalizer",
+    "args": {
+      "target_loudness": -23,
+      "sr": 16000
+    }
+  },
   "data": {
     "train": {
       "batch_size": 4,
@@ -58,13 +65,6 @@
     "args": {}
   },
   "metrics": [
-    {
-      "type": "PESQMetric",
-      "args": {
-        "name": "w1_PESQ",
-        "pred_wave_index": 1
-      }
-    }
   ],
   "trainer": {
     "epochs": 100,
@@ -78,7 +78,7 @@
         }
     },
     "verbosity": 2,
-    "monitor": "max SI-SDR",
+    "monitor": "max val_w1_SI-SDR",
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "tss_project",
