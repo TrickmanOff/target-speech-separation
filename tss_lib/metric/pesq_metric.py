@@ -1,3 +1,5 @@
+import torch
+from pesq import NoUtterancesError
 from torch import Tensor
 from torchmetrics.audio.pesq import PerceptualEvaluationSpeechQuality as PESQ
 
@@ -17,4 +19,8 @@ class PESQMetric(BaseMetric):
 
     def __call__(self, target_wave: Tensor, **batch) -> Tensor:
         pred_wave = batch[f'w{self.pred_wave_index}']
-        return self.pesq_metric(pred_wave, target_wave)
+        try:
+            return self.pesq_metric(pred_wave, target_wave).mean()
+        except NoUtterancesError:
+            print('NoUtterancesError')
+            return torch.tensor([1.])
