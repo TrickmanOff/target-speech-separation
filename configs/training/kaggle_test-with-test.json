@@ -40,6 +40,21 @@
         }
       ]
     },
+    "val": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean-3s",
+            "data_dir": "/kaggle/input/librispeech-mixtures/dev-clean-3s",
+            "index_dir": "/kaggle/working/indices",
+            "limit": 50
+          }
+        }
+      ]
+    },
     "test": {
       "batch_size": 1,
       "num_workers": 0,
@@ -92,7 +107,7 @@
     "visualize": "wandb",
     "wandb_project": "tss_project",
     "wandb_run": "kaggle_test-with-test",
-    "len_epoch": 1,
+    "len_epoch": 300,
     "log_step": 150,
     "grad_norm_clip": 50
   }
