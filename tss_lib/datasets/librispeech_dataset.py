@@ -17,7 +17,7 @@ from tss_lib.utils.util import EnhancedJSONEncoder
 URL_LINKS = {
     "dev-clean-3s": "https://www.googleapis.com/drive/v3/files/1FeRerEjCW0ibqP7EfvjgVpmxESmXJqAH?alt=media&key=AIzaSyBAigZjTwo8uh77umBBmOytKc_qjpTfRjI",
     "test-clean": "https://www.googleapis.com/drive/v3/files/10Yv8CThNaYTB55kW17a6LbtUDKXscxON?alt=media&key=AIzaSyBAigZjTwo8uh77umBBmOytKc_qjpTfRjI",
-    "train-clean-3s": "TODO",
+    "train-clean-3s": "https://www.googleapis.com/drive/v3/files/1SjnykxC_zsWwGXCmF5WwfzNuvXpE97EK?alt=media&key=AIzaSyBAigZjTwo8uh77umBBmOytKc_qjpTfRjI",
 }
 
 
