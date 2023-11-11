@@ -16,13 +16,6 @@
       "num_blocks": 8
     }
   },
-  "postprocessor": {
-    "type": "LoudnessNormalizer",
-    "args": {
-      "target_loudness": -23,
-      "sr": 16000
-    }
-  },
   "data": {
     "train": {
       "batch_size": 4,
@@ -33,8 +26,21 @@
           "args": {
             "part": "train-clean-3s",
             "data_dir": "/kaggle/input/librispeech-mixtures/train-clean-3s",
-            "index_dir": "/kaggle/working/indices",
-            "limit": 4
+            "index_dir": "/kaggle/working/indices"
+          }
+        }
+      ]
+    },
+    "test": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean-3s",
+            "data_dir": "/kaggle/input/librispeech-mixtures/dev-clean-3s",
+            "index_dir": "/kaggle/working/indices"
           }
         }
       ]
@@ -76,7 +82,7 @@
   "trainer": {
     "epochs": 50,
     "save_dir": "saved/",
-    "save_period": 5,
+    "save_period": 200,
     "verbosity": 2,
     "monitor": "min val_loss",
     "early_stop": 100,
