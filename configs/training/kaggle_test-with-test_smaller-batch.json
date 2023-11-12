@@ -1,0 +1,114 @@
+{
+  "name": "kaggle_test_smaller-batch",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 16000
+  },
+  "arch": {
+    "type": "SpexPlus",
+    "args": {
+      "num_classes": 1212,
+      "N": 128,
+      "ref_embed_dim": 256,
+      "O": 256,
+      "P": 512,
+      "num_tcn_stacks": 4,
+      "num_blocks": 8,
+      "chunk_dur": 3,
+      "sr": 16000
+    }
+  },
+  "postprocessor": {
+    "type": "LoudnessNormalizer",
+    "args": {
+      "target_loudness": -23,
+      "sr": 16000
+    }
+  },
+  "data": {
+    "train": {
+      "batch_size": 2,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "train-clean-3s",
+            "data_dir": "/kaggle/input/librispeech-mixtures/train-clean-3s",
+            "index_dir": "/kaggle/working/indices"
+          }
+        }
+      ]
+    },
+    "val": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "dev-clean-3s",
+            "data_dir": "/kaggle/input/librispeech-mixtures/dev-clean-3s",
+            "index_dir": "/kaggle/working/indices",
+            "limit": 50
+          }
+        }
+      ]
+    },
+    "test": {
+      "batch_size": 1,
+      "num_workers": 0,
+      "datasets": [
+        {
+          "type": "LibrispeechDataset",
+          "args": {
+            "part": "test-clean",
+            "data_dir": "/kaggle/input/librispeech-mixtures/test-clean",
+            "index_dir": "/kaggle/working/indices",
+            "limit": 50
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "type": "Adam",
+    "args": {
+      "lr": 1e-3
+    }
+  },
+  "loss": {
+    "type": "SpexPlusLoss",
+    "args": {}
+  },
+  "metrics": [
+    {
+      "type": "PESQMetric",
+      "args": {
+        "name": "w1_PESQ",
+        "pred_wave_index": 1
+      }
+    }
+  ],
+  "trainer": {
+    "epochs": 100,
+    "save_dir": "saved/",
+    "save_period": 100000000000,
+    "external_storage": {
+        "type": "GDriveStorage",
+        "args": {
+            "storage_dir_id": "1XvqMQjnXGuNT3lL7xPuEK-qVCc8i-e9D",
+            "client_secrets_filepath": "/kaggle/input/gdrive-secrets/client_secrets.json"
+        }
+    },
+    "verbosity": 2,
+    "monitor": "max val_w1_SI-SDR",
+    "early_stop": 100,
+    "visualize": "wandb",
+    "wandb_project": "tss_project",
+    "wandb_run": "kaggle_test-with-test_smaller-batch",
+    "len_epoch": 600,
+    "log_step": 300,
+    "grad_norm_clip": 50
+  }
+}
