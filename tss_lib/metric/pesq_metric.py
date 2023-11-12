@@ -23,4 +23,4 @@ class PESQMetric(BaseMetric):
             return self.pesq_metric(pred_wave, target_wave).mean()
         except NoUtterancesError:
             print('NoUtterancesError')
-            return torch.tensor([1.])
+            return torch.tensor(1.)
