@@ -91,7 +91,7 @@
     }
   ],
   "trainer": {
-    "epochs": 100,
+    "epochs": 500,
     "save_dir": "saved/",
     "save_period": 100000000000,
     "external_storage": {
