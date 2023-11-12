@@ -8,7 +8,11 @@ from tss_lib.metric.base_metric import BaseMetric
 
 def calc_pesq(target_wave: Tensor, pred_wave: Tensor, sr: int = 16_000) -> Tensor:
     pesq_metric = PESQ(fs=sr, mode='wb')
-    return pesq_metric(pred_wave, target_wave)
+    try:
+        return pesq_metric(pred_wave, target_wave)
+    except NoUtterancesError:
+        print('NoUtterancesError')
+        return torch.tensor(1.)
 
 
 class PESQMetric(BaseMetric):
