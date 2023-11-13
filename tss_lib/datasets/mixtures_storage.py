@@ -1,6 +1,7 @@
 import json
 import os
 from abc import abstractmethod
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Dict, Optional, Union
@@ -124,10 +125,11 @@ class CustomDirMixturesStorage(MixturesStorage):
         filedirs = {suf: self._dirpath / dirname for suf, dirname in zip(self.SUFFIXES, self.DIRNAMES)}
         filenames = {suf: f'{mix_id}-{suf}{with_ext}' for suf in self.SUFFIXES}
         for suf, filedir in filedirs.items():
+            stem = filenames[suf]
             for filename in os.listdir(filedir):
-                part = os.path.splitext(filename)[0].split('-')[-1]
-                if part == suf:
-                    filenames[part] = filename
+                if os.path.splitext(filename)[0] == stem:
+                    filenames[suf] = filename
+                    break
         return {
             'mixed_wave': filedirs[self.MIX_SUFFIX] / filenames[self.MIX_SUFFIX],
             'target_wave': filedirs[self.TARGET_SUFFIX] / filenames[self.TARGET_SUFFIX],
@@ -135,18 +137,23 @@ class CustomDirMixturesStorage(MixturesStorage):
         }
 
     def get_index(self) -> Dict[str, Dict]:
-        index = {}
-        for filename in os.listdir(self._dirpath / self.MIX_DIRNAME):
-            mix_id = filename.split('-')[0]
-            filepaths = self.get_mix_filepaths(mix_id)
+        index = defaultdict(dict)  # mix_id: paths
+        dirpaths = {suf: self._dirpath / dirname for suf, dirname in zip(self.SUFFIXES, self.DIRNAMES)}
+        for suf, dirpath in dirpaths.items():
+            for filename in os.listdir(dirpath):
+                mix_id = filename.split('-')[0]
+                assert os.path.splitext(filename)[0].endswith(f'-{suf}')
+                index[mix_id][suf] = dirpath / filename
 
-            all_present = True
-            for filepath in filepaths.values():
-                if not filepath.exists():
-                    all_present = False
-                    print(f'No file {filepath}')
-            if not all_present:
-                continue
+        final_index = {}
+        for mix_id, filepaths in index.items():
+            if len(filepaths) < 3:
+                print(f'Some files are missing for mix \"{mix_id}\"')
+            else:
+                final_index[mix_id] = {
+                    'mixed_wave': filepaths[self.MIX_SUFFIX],
+                    'target_wave': filepaths[self.TARGET_SUFFIX],
+                    'ref_wave': filepaths[self.REF_SUFFIX],
+                }
 
-            index[mix_id] = filepaths
-        return index
+        return final_index
