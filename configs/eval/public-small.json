@@ -6,15 +6,13 @@
           "sr": 16000
         }
     },
-    "metrics": {
-        "metrics": [
-            {
-              "type": "PESQMetric",
-              "args": {
-                "name": "PESQ",
-                "pred_wave_index": 1
-              }
-            }
-        ]
-    }
+    "metrics": [
+        {
+          "type": "PESQMetric",
+          "args": {
+            "name": "PESQ",
+            "pred_wave_index": 1
+          }
+        }
+    ]
 }

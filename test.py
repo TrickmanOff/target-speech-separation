@@ -143,7 +143,7 @@ if __name__ == "__main__":
                 "num_workers": args.jobs,
                 "datasets": [
                     {
-                        "type": "CustomDirAudioDataset",
+                        "type": "CustomDirMixturesDataset",
                         "args": {
                             "mixtures_dir": str(test_data_folder)
                         },
