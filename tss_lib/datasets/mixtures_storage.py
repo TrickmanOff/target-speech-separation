@@ -100,4 +100,53 @@ class SimpleMixturesStorage(MixturesStorage):
             index[mix_id] = mix_data
         return index
 
-# TODO: write another storage for testing
+
+# currently, can be used only for reading
+# {mix_id}-{type}.{ext}
+class CustomDirMixturesStorage(MixturesStorage):
+    MIX_SUFFIX = 'mixed'
+    TARGET_SUFFIX = 'target'
+    REF_SUFFIX = 'ref'
+
+    SUFFIXES = (MIX_SUFFIX, TARGET_SUFFIX, REF_SUFFIX)
+
+    MIX_DIRNAME = 'mix'
+    TARGET_DIRNAME = 'targets'
+    REF_DIRNAME = 'refs'
+
+    DIRNAMES = (MIX_DIRNAME, TARGET_DIRNAME, REF_DIRNAME)
+
+    def __init__(self, dirpath: Union[str, Path]):
+        self._dirpath = Path(dirpath)
+
+    def get_mix_filepaths(self, mix_id: str, with_ext: Optional[str] = None) -> Dict[str, Path]:
+        with_ext = with_ext or ''
+        filedirs = {suf: self._dirpath / dirname for suf, dirname in zip(self.SUFFIXES, self.DIRNAMES)}
+        filenames = {suf: f'{mix_id}-{suf}{with_ext}' for suf in self.SUFFIXES}
+        for suf, filedir in filedirs.items():
+            for filename in os.listdir(filedir):
+                part = os.path.splitext(filename)[0].split('-')[-1]
+                if part == suf:
+                    filenames[part] = filename
+        return {
+            'mixed_wave': filedirs[self.MIX_SUFFIX] / filenames[self.MIX_SUFFIX],
+            'target_wave': filedirs[self.TARGET_SUFFIX] / filenames[self.TARGET_SUFFIX],
+            'ref_wave': filedirs[self.REF_SUFFIX] / filenames[self.REF_SUFFIX],
+        }
+
+    def get_index(self) -> Dict[str, Dict]:
+        index = {}
+        for filename in os.listdir(self._dirpath / self.MIX_DIRNAME):
+            mix_id = filename.split('-')[0]
+            filepaths = self.get_mix_filepaths(mix_id)
+
+            all_present = True
+            for filepath in filepaths.values():
+                if not filepath.exists():
+                    all_present = False
+                    print(f'No file {filepath}')
+            if not all_present:
+                continue
+
+            index[mix_id] = filepaths
+        return index
