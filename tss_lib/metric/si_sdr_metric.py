@@ -11,5 +11,6 @@ class SISDRMetric(BaseMetric):
         self.pred_wave_index = pred_wave_index
 
     def __call__(self, target_wave: Tensor, **batch) -> Tensor:
+        self.metric = self.metric.to(target_wave.device)
         pred_wave = batch[f'w{self.pred_wave_index}']
         return self.metric(pred_wave, target_wave).mean()
