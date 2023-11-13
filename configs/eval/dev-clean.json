@@ -1,0 +1,40 @@
+{
+    "data": {
+      "test": {
+        "batch_size": 1,
+        "num_workers": 0,
+        "datasets": [
+          {
+            "type": "LibrispeechDataset",
+            "args": {
+              "part": "dev-clean-3s",
+              "limit": 200
+            }
+          }
+        ]
+      }
+    },
+    "postprocessor": {
+        "type": "LoudnessNormalizer",
+        "args": {
+          "target_loudness": -23,
+          "sr": 16000
+        }
+    },
+    "metrics": [
+        {
+          "type": "PESQMetric",
+          "args": {
+            "name": "PESQ",
+            "pred_wave_index": 1
+          }
+        },
+      {
+          "type": "SISDRMetric",
+          "args": {
+            "name": "SI-SDR",
+            "pred_wave_index": 1
+          }
+        }
+    ]
+}
