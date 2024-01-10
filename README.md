@@ -26,8 +26,8 @@ python3 generate_mixtures.py \
 > `train-clean-100`были отображены в отрезок [0, 290] на основе файла `SPEAKERS.TXT` из датасета.
 > Файл отображения из исходных ID в новые можно передать в скрипт аргументом `-m/--mapping`.
 
-Сгенерированные на основе Librispeech датасеты расположены на [Google-диске](https://drive.google.com/drive/folders/1QBd2_5cuVlu3QgqMt5IqOzXagQ94nZ_y?usp=drive_link)
-и будут загружены автоматически при их использовании через `tss_lib.datasets.LibrispeechDataset`.
+Сгенерированные на основе Librispeech датасеты расположены на ~~[Google-диске](https://drive.google.com/drive/folders/1QBd2_5cuVlu3QgqMt5IqOzXagQ94nZ_y?usp=drive_link)
+и будут загружены автоматически при их использовании через `tss_lib.datasets.LibrispeechDataset`~~ [Яндекс диске](https://disk.yandex.ru/d/EAOv9By429lcyg), для их использования необходимо загрузить и распаковать архив с выбранным набором миксов в некоторую директорию `$dir` и затем в конфиге при использовании `tss_lib.datasets.LibrispeechDataset` в аргументе `data_dir` указать `{$dir}/{название миксов}` (например, `{$dir}/dev-clean-3s`).
 Также они доступны на [Kaggle](https://www.kaggle.com/datasets/trickmanoff/librispeech-mixtures).
 
 ## Обучение модели
